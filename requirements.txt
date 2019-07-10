@@ -2,13 +2,14 @@ certifi==2019.3.9
 chardet==3.0.4
 coreapi==2.3.3
 coreschema==0.0.4
-Django==2.1
+Django==2.1.10
 django-ckeditor==5.7.1
 django-crispy-forms==1.7.2
 django-filter==2.1.0
 django-guardian==1.5.1
 django-js-asset==1.2.2
 django-simpleui==2.1.1
+django-suit==2.0a1
 djangorestframework==3.9.4
 idna==2.8
 itypes==1.1.0
