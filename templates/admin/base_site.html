@@ -1,0 +1,12 @@
+{# 定制 admin #}
+{# 在 admin.py 中配置 题目#}
+
+{% extends "admin/base.html" %}
+
+{% block title %}{{ site_title }}{% endblock %}
+
+{% block branding %}
+<h1 id="site-name"><a href="{% url 'admin:index' %}">{{ site_header|default:_('Django administration') }}</a></h1>
+{% endblock %}
+
+{% block nav-global %}{% endblock %}

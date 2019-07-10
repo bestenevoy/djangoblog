@@ -1,0 +1,131 @@
+{% extends 'base.html' %}
+{% block title %}{{ article.title }}{{ title }}{% endblock %}
+{% block nav_blog_active %}active{% endblock %}
+{% block content %}
+    <div class="container">
+        <div class="row">
+            <div class="col-xs-10 col-xs-offset-1">
+                <h1>{{ article.title }}</h1>
+                <ul class="blog-info-description">
+                    <li><span class="glyphicon glyphicon-time"></span>
+                        {{ article.created_time|date:"Y-m-d H:i" }}
+                    </li>
+                    <li><span class="glyphicon glyphicon-pencil"></span>
+                        {{ article.author }}</li>
+                    <li><i class="fa fa-eye" aria-hidden="true"></i>
+                        {{ article.views }}</li>
+                    <li><span class="glyphicon glyphicon-list"></span>
+                        <a href="{% url 'blog:category_detail' article.category_id %}">
+                            {{ article.category.name }}
+                        </a>
+                    </li>
+
+                </ul>
+                <div class="blog-content">{{ article.content|safe }}</div>
+
+                <div class="top-gap clearfix">
+
+                    {% if previous_article %}
+                        <a href="{% url 'blog:article' previous_article.pk %}">
+                        <i class="fa fa-angle-double-left" aria-hidden="true"></i>
+                        {{ previous_article.title }}
+                    {% else %}
+                        <a href="javascript:">没有了
+                    {% endif %}
+                    </a>
+                    {% if next_article %}
+                        <a class="pull-right" href="{% url 'blog:article' next_article.pk %}">{{ next_article.title }}
+                    {% else %}
+                        <a class="pull-right" href="javascript:">没有了
+                    {% endif %}
+                    <i class="fa fa-angle-double-right" aria-hidden="true"></i>
+                    </a>
+                </div>
+                <div class="comment-area">
+                    <h3 class="comment-area-title">留言</h3>
+                    {# 验证是否登陆，登录之后才能评论 #}
+                    {% if user.is_authenticated %}
+                        <div class="comment-area-submit">
+                            <div class="pull-right"><a href="javascript:reply(0,0);">点击留言</a></div>
+                            <form id="comment-form" action="{% url 'comment:comment' %}" method="post">
+                                {% csrf_token %}
+                                <h5>评论内容：</h5><br>
+                                {{ comments_form }}
+                                <input class="pull-right btn" id="comment-submit" type="submit" disabled='true' value="提交">
+                            </form>
+                        </div>
+                    {% else %}
+                        请先 <a href="{% url 'comment:comment' %}">登录</a>
+                    {% endif %}
+
+                    <div class="comment-area-info">
+                        <ul>
+                            {% for comment in comments %}
+                                {% if not comment.root %}
+                                    <li>{{ comment.user }}
+                                        {% if not comment.parent.user.username %}
+                                            说：
+                                        {% else %}
+                                            回复{{ comment.parent.user.username }}:
+                                        {% endif %}
+                                        {{ comment.body }}
+                                        <i class="pull-right">{{ comment.created_time| date:"Y-m-d H:i " }}</i>
+                                        <a style="text-indent:2em;" id="" href="javascript:reply({{ comment.id }},0);">回复</a>
+                                    </li>
+                                    {# 遍历此评论为根评论下的所有内容 #}
+                                    {% for comment in comment.rev_root_comment.all %}
+                                        <li style="text-indent:2em;">{{ comment.created_time| date:"Y-m-d H:i " }}&nbsp{{ comment.user }}
+                                            {% if not comment.parent.user.username %}
+                                                说：
+                                            {% else %}
+                                                回复{{ comment.parent.user.username }}:
+                                            {% endif %}
+                                            {{ comment.body }}
+                                        &nbsp&nbsp&nbsp&nbsp
+                                            <a style="text-indent:2em;" id="" href="javascript:reply({{ comment.root.id }},{{ comment.id }});">回复</a>
+                                        </li>
+                                    {% endfor %}
+
+                                {% endif %}
+                            {% endfor %}
+                        </ul>
+
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+{% endblock content %}
+{% block bottom_file %}
+    <script>
+        $('#comment-form').submit(function () {
+            $.ajax({
+                url: "{% url 'comment:comment' %}",
+                type: 'POST',
+                data: $(this).serialize(),
+                cache: false,
+
+            });
+            $('#comment-submit').attr('disabled',true);
+            return false;
+        });
+
+        function reply(root_id,parent_id) {
+            //
+            $('#comment-submit').attr('disabled',false);
+            // 设置值
+            $("#root_id").val(root_id);
+            $("#parent_id").val(parent_id);
+            $('#id_body').show();
+            var html = 0;
+
+            $('html').animate({scrollTop: $('#comment-form').offset().top - 60}, 300, function () {
+                $('#id_body').focus();
+            })
+        }
+
+    </script>
+
+{% endblock %}
