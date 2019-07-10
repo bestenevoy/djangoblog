@@ -1,0 +1,6 @@
+{% extends 'blog/article_list.html' %}
+{% block title %}{{ category.name }}{% endblock %}
+
+{% block article_list_title %}
+分类：{{ category.name }},共有{{ articles_of_page.paginator.count }}篇文章
+{% endblock %}

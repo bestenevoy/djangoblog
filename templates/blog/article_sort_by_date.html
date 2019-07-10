@@ -1,0 +1,3 @@
+{% extends 'blog/article_list.html'%}
+{% block title %}{{ date_time }}{% endblock %}
+{% block article_list_title %}日期归档：{{ date_time }}（一共有{{ articles_of_page.paginator.count }}篇文章）{% endblock %}

@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+{% block title %}
+用户中心
+{% endblock %}
+
+{% block content %}
+    用户名：{{ user.username }}<br>
+    昵称：{{ user.nickname }}<a href="{% url 'user:change_nickname' %}">修改昵称</a><br>
+    邮箱：{{ user.email }}<br>
+    <a href="{% url 'user:change_password' %}">更改密码</a>
+{% endblock %}

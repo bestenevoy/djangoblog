@@ -1,0 +1,78 @@
+{% extends 'base.html'%}
+{% block title %}文章列表{% endblock %}
+{% block nav_blog_active %}active{% endblock %}
+{% block content %}
+    <div class="container">
+    <div class="row">
+        <div class="col-xs-12 col-sm-8 col-md-9 col-lg-10">
+        <div class="panel panel-default">
+        <div class="panel-heading">
+            {% block article_list_title %}博客列表（一共有{{ articles_of_page.paginator.count }}篇文章）{% endblock %}
+        </div>
+            <div class="panel-body">
+                {% for article in articles_of_page %}
+                <h3><span class="glyphicon glyphicon-book" aria-hidden="true"></span><a href="{% url 'blog:article' article.pk%}">{{ article.title }}</a></h3>
+{#                <p>{{ article.excerpt|safe }}</p>#}
+                {% empty %}
+                <h4>暂无文章，敬请等待</h4>
+                {% endfor %}
+
+              <ul class="pagination">
+                  {% if articles_of_page.has_previous %}
+                    <li>
+                        <a href="?page={{ articles_of_page.previous_page_number }}" aria-label="Previous">
+                            <span aria-hidden="true">&laquo;</span>
+                        </a>
+                    </li>
+                  {% endif %}
+
+                {% for i in page_range %}
+                    {% if i == articles_of_page.number %}
+                    <li class=active><a href="?page={{ i }}">{{ i }}</a></li>
+                    {% else %}
+                    <li><a href="?page={{ i }}">{{ i }}</a></li>
+                    {% endif %}
+                {% endfor %}
+
+                  {% if articles_of_page.has_next %}
+                    <li>
+                        <a href="?page={{ articles_of_page.next_page_number }}"
+                           aria-label="Next">
+                            <span aria-hidden="true">&raquo;</span>
+                        </a>
+                    </li>
+                  {% endif %}
+              </ul>
+            </div>
+        </div>
+
+        </div>
+        <div class="hidden-xs col-sm-4 col-md-3 col-lg-2">
+            <div class="panel panel-default">
+                <div class="panel-heading">文章分类</div>
+                <div class="panel-body">
+                    <ul class="blog_category">
+                    {% for category in categorys %}
+                        <li><a href="{% url 'blog:category_detail' category.pk %}">{{ category.name }}</a></li>
+                    {% empty %}
+                        <li>{{ '暂无分类' }}</li>
+                    {% endfor %}
+                    </ul>
+                </div>
+            </div>
+            <div class="panel panel-default">
+                <div class="panel-heading">日期归档</div>
+                <div class="panel-body">
+                    <ul>
+                        {% for sortbydate in article_by_dates %}
+                        <li><a href="{% url 'blog:sortbydate' sortbydate.year sortbydate.month%}">
+                            {{ sortbydate| date:'Y年m月' }}</a></li>
+                        {% endfor %}
+                    </ul>
+                </div>
+        </div>
+        </div>
+    </div>
+    </div>
+
+{% endblock content %}
