@@ -1,6 +1,7 @@
 from django.db import models
 from django.conf import settings
 
+from mdeditor.fields import MDTextField
 from ckeditor_uploader.fields import RichTextUploadingField
 # Create your models here.
 
@@ -35,7 +36,8 @@ class Tag(models.Model):
 class Article(models.Model):
     title = models.CharField('标题', max_length=70)
     # excerpt = models.TextField('摘要', max_length=200, blank=True)
-    content = RichTextUploadingField()
+    content = MDTextField()
+    # content = RichTextUploadingField()
     # img = models.ImageField(upload_to='article_img/%Y/%m/%d/', verbose_name='文章图片', blank=True, null=True)
     author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.DO_NOTHING, verbose_name='作者')
     views = models.PositiveIntegerField('阅读量', default=0)
