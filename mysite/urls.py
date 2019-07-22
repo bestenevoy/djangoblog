@@ -13,6 +13,7 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
+from django.conf.urls import url
 from django.contrib import admin
 from django.urls import path, re_path, include
 from django.conf import settings
@@ -20,11 +21,14 @@ from django.conf.urls.static import static
 
 urlpatterns = [
     path('薬/', admin.site.urls), # 使用{% url 'admin:index' %}反向解析
+    url(r'mdeditor/', include('mdeditor.urls')),
     path('ckeditor', include('ckeditor_uploader.urls')), # 富文本文件地址
     path('user/', include(('user.urls', 'user'), namespace='user')),
     path('comment/', include(('comment.urls', 'comment'), namespace='comment')),
     path('api-auth/', include('rest_framework.urls')),
+    path('file/',include('share.urls')),
     path('',include(('blog.urls','blog'),namespace='blog')),
 ]
-
-urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+if settings.DEBUG:
+    # static files (images, css, javascript, etc.)
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

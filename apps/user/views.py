@@ -56,7 +56,7 @@ class LoginView(View):
     def get(self, request):
         login_form = LoginForm()
         context = {}
-        context['login_form'] = login_form
+        context['form'] = login_form
         return render(request, 'user/login.html', context)
 
     def post(self, request):
@@ -111,7 +111,7 @@ class ChangePasswordView(LoginRequiredMixin, View):
     def get(self, request):
         change_password_form = ChangePasswordForm()
         context = {}
-        context['change_password_form'] = change_password_form
+        context['form'] = change_password_form
         return render(request, 'user/change_password.html', context)
 
     def post(self, request):
