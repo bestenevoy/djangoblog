@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'mdeditor',
     'ckeditor',
     'ckeditor_uploader',
     'rest_framework', # 注册django REST framework
@@ -48,6 +49,7 @@ INSTALLED_APPS = [
     'user',
     'comment',
     'utils',
+    'share',
 ]
 
 # AUTHENTICATION_BACKENDS = (
@@ -134,6 +136,7 @@ USE_TZ = False
 # https://docs.djangoproject.com/en/2.1/howto/static-files/
 
 STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(BASE_DIR,'static_file')
 # 设置静态文件目录
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR,'static'),
@@ -141,7 +144,8 @@ STATICFILES_DIRS = [
 
 # media
 MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(BASE_DIR,'media/')
+# MEDIA_ROOT = os.path.join(BASE_DIR,'media/')
+MEDIA_ROOT = os.path.join(BASE_DIR,'uploads')
 
 # 配置ckeditor
 CKEDITOR_UPLOAD_PATH = 'upload/'
@@ -166,39 +170,38 @@ EMAIL_PORT = 25
 #发送邮件的邮箱
 EMAIL_HOST_USER = 'wrz997@163.com'
 #在邮箱中设置的客户端授权密码
-EMAIL_HOST_PASSWORD = 'wrz997'
+EMAIL_HOST_PASSWORD = '输入自己的邮箱授权码'
 #收件人看到的发件人
 EMAIL_FROM = 'wrz8.com<wrz997@163.com>'
 # 不为 True smtp 服务器拒绝处理
 EMAIL_USE_TLS = True
 
-# 富文本编辑器配置项
-# CKEDITOR_CONFIGS = {
-#     # django-ckeditor默认使用default配置
-#     'default': {
-#         # 编辑器宽度自适应
-#         'width':'auto',
-#         'height':'250px',
-#         # tab键转换空格数
-#         'tabSpaces': 4,
-#         # 工具栏风格
-#         'toolbar': 'Custom',
-#         # 工具栏按钮
-#         'toolbar_Custom': [
-#             # 表情 代码块
-#             ['Smiley', 'CodeSnippet'],
-#             # 字体风格
-#             ['Bold', 'Italic', 'Underline', 'RemoveFormat', 'Blockquote'],
-#             # 字体颜色
-#             ['TextColor', 'BGColor'],
-#             # 链接
-#             ['Link', 'Unlink'],
-#             # 列表
-#             ['NumberedList', 'BulletedList'],
-#             # 最大化
-#             ['Maximize']
-#         ],
-#         # 加入代码块插件
-#         'extraPlugins': ','.join(['codesnippet']),
-#     }
-# }
+MDEDITOR_CONFIGS = {
+    'default': {
+        'width': '90% ',  # Custom edit box width
+        'heigth': 500,  # Custom edit box height
+        'toolbar': ["undo", "redo", "|",
+                    "bold", "del", "italic", "quote", "ucwords", "uppercase", "lowercase", "|",
+                    "list-ul", "list-ol", "hr", "|",
+                    "link", "reference-link", "image", "code", "preformatted-text", "code-block", "table", "datetime"
+                                                                                                           "emoji",
+                    "html-entities", "pagebreak", "goto-line", "|",
+                    "help", "info",
+                    "||", "preview", "watch", "fullscreen"],  # custom edit box toolbar
+        'upload_image_formats': ["jpg", "jpeg", "gif", "png", "bmp", "webp"],  # image upload format type
+        'image_folder': 'editor',  # image save the folder name
+        'theme': 'default',  # edit box theme, dark / default
+        'preview_theme': 'default',  # Preview area theme, dark / default
+        'editor_theme': 'default',  # edit area theme, pastel-on-dark / default
+        'toolbar_autofixed': True,  # Whether the toolbar capitals
+        'search_replace': True,  # Whether to open the search for replacement
+        'emoji': True,  # whether to open the expression function
+        'tex': True,  # whether to open the tex chart function
+        'flow_chart': True,  # whether to open the flow chart function
+        'sequence': True,  # Whether to open the sequence diagram function
+        'watch': True,  # Live preview
+        'lineWrapping': False,  # lineWrapping
+        'lineNumbers': False  # lineNumbers
+    }
+
+}

@@ -11,8 +11,8 @@ from comment.models import Comment
 from comment.forms import CommentForm
 from utils.paginator import paginator
 
+import markdown
 # Create your views here.
-
 # localhost:8000/
 class HomeView(View):
     '''首页显示'''
@@ -36,11 +36,20 @@ class ArticleDetailView(View):
         next_article = Article.objects.filter(created_time__lt=article.created_time).first()
         article_model = ContentType.objects.get_for_model(Article)
         comments = Comment.objects.filter(content_type=article_model, object_id=article_pk)
+        md = markdown.Markdown(
+            extensions=[
+                'markdown.extensions.extra',
+                'markdown.extensions.codehilite',
+                'markdown.extensions.toc',
+            ]
+        )
+        article.content = md.convert(article.content)
         # 组织模版上下文
         context = {}
         context['previous_article'] = previous_article
         context['next_article'] = next_article
         context['article'] = article
+        context['pre_page'] = request.META.get('HTTP_REFERER')
         context['comments'] = comments
         context['comments_form'] = CommentForm(initial={'content_type': article_model.model,
                                                         'object_id': article_pk,})
@@ -55,7 +64,7 @@ class ArticleListView(View):
 
     def get(self, request):
         articles = Article.objects.all()
-        articles_of_page, page_range = paginator(request, articles, 2)
+        articles_of_page, page_range = paginator(request, articles, 5)
         context = {}
         context['articles_of_page'] = articles_of_page
         context['page_range'] = page_range

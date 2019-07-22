@@ -1,0 +1,1620 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- Required meta tags -->
+  <meta charset="utf-8">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
+  <meta name="baidu-site-verification" content="GOgEP8c1pN">
+
+
+  <title>
+    一种自顶而下的Python装饰器设计方法_追梦人物的博客</title>
+
+  <link href="https://cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.3/css/all.css" integrity="sha384-UHRtZLI+pbxtHCWp1t77Bi1L4ZtiqrqD80Kn4Z8NTSRyMA2Fd33n5dQ8lWUE00s/" crossorigin="anonymous">
+  <link rel="stylesheet" href="/static/blog/css/mobi.min.css">
+  <link rel="stylesheet" href="/static/blog/css/modal.min.css">
+  <link rel="stylesheet" href="/static/blog/css/friendly.css">
+  <link rel="stylesheet" href="/static/blog/css/blog.css?v0.12">
+  <link rel="stylesheet" href="/static/courses/css/courses.css">
+  <script src="https://zz.bdstatic.com/linksubmit/push.js"></script><script src="https://hm.baidu.com/hm.js?fb59b2a6022bccc02671a750f61c356b"></script><script src="/static/blog/js/jquery-3.3.1.min.js"></script>
+  <script src="/static/blog/js/menu.js"></script>
+  <script src="/static/blog/js/modal.min.js"></script>
+  <script src="/static/blog/js/blog.js"></script>
+  
+
+  
+    <script>
+        // baidu statistics
+        var _hmt = _hmt || [];
+        (function () {
+        var hm = document.createElement("script");
+        hm.src = "https://hm.baidu.com/hm.js?fb59b2a6022bccc02671a750f61c356b";
+        var s = document.getElementsByTagName("script")[0];
+        s.parentNode.insertBefore(hm, s);
+        })();
+
+        // baidu auto push
+        (function () {
+            var bp = document.createElement('script');
+            var curProtocol = window.location.protocol.split(':')[0];
+            if (curProtocol === 'https') {
+                bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';
+            }
+            else {
+                bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+            }
+            var s = document.getElementsByTagName("script")[0];
+            s.parentNode.insertBefore(bp, s);
+        })();
+    </script>
+    
+  
+</head>
+<body class="bg-light">
+<header>
+  <nav class="flex-center bg-white nav-bar">
+    <div class="container-wider flex-middle">
+      
+  <a class="show-on-mobile nav-link m-5" id="js-sidebar-btn" href="https://www.zmrenwu.com/post/87/#" role="button">
+    <i class="fa fa-chevron-right" aria-hidden="true"></i>
+  </a>
+
+      <a class="nav-bar-logo mr-7" href="https://www.zmrenwu.com/">
+        <img src="./一种自顶而下的Python装饰器设计方法_追梦人物的博客_files/logo.png" alt="blog logo">
+      </a>
+      <ul class="unit-0 hide-on-mobile nav-bar-nav">
+        <li class="nav-item mr-7">
+          <a class="nav-link" href="https://www.zmrenwu.com/">首页</a>
+        </li>
+        <li class="nav-item mr-7">
+          <a class="nav-link" href="https://www.zmrenwu.com/courses/">教程</a>
+        </li>
+        <li class="nav-item mr-7">
+          <a class="nav-link" href="https://www.zmrenwu.com/categories/">分类</a>
+        </li>
+        <li class="nav-item mr-7">
+          <a class="nav-link" href="https://www.zmrenwu.com/archives/">归档</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="https://www.zmrenwu.com/donate/">赞助</a>
+        </li>
+      </ul>
+      <div class="unit flex-right flex-middle">
+        <form class="flex-left flex-middle search-form mr-5" id="search-form" action="https://www.zmrenwu.com/search/" style="display: none;">
+          <input class="unit" type="search" name="q" placeholder="搜索...">
+          <button class="unit-0" type="submit" role="button">
+            <i class="fa fa-search" aria-hidden="true"></i>
+          </button>
+        <div class="musk" id="search-musk" style="display: none;"></div></form>
+        <a class="show-on-mobile nav-link fs-7 mr-7" id="js-search-btn" href="https://www.zmrenwu.com/post/87/#" role="button">
+          <i class="fa fa-search" aria-hidden="true"></i>
+        </a>
+        <div class="flex-middle notification">
+          
+            <a class="nav-link" href="https://www.zmrenwu.com/accounts/login/">
+              <i class="fas fa-sign-in-alt" aria-hidden="true"></i>
+            </a>
+          
+        </div>
+        <div class="show-on-mobile flex-middle">
+          <a class="nav-link fs-7 ml-7 mr-5" id="menu-toggle" href="https://www.zmrenwu.com/post/87/#">
+            <i class="fa fa-ellipsis-v" aria-hidden="true"></i>
+          </a>
+          <ul class="menu bg-white menu--right" data-menu="" data-menu-toggle="#menu-toggle" style="top: 29.5px; left: 382px;">
+            <li class="nav-item mr-7">
+              <a class="nav-link" href="https://www.zmrenwu.com/">首页</a>
+            </li>
+            <li>
+              <a href="https://www.zmrenwu.com/tutorials/">教程</a>
+            </li>
+            <li>
+              <a href="https://www.zmrenwu.com/categories/">分类</a>
+            </li>
+            <li>
+              <a href="https://www.zmrenwu.com/archives/">归档</a>
+            </li>
+            <li>
+              <a href="https://www.zmrenwu.com/donate/">赞助</a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </nav>
+</header>
+<section class="flex-center">
+  <div class="container-wider">
+    <!-- 模态框（Modal） -->
+    <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+              ×
+            </button>
+            <h4 class="modal-title" id="myModalLabel">设置评论回复接收邮箱</h4>
+            <div class="text-primary mt-2">邮箱仅用于接收回复提醒，不会被公开。</div>
+            
+          </div>
+          <div class="modal-body">
+            <form class="form email-binding-form" action="https://www.zmrenwu.com/comments/ajax_email_binding/">
+              <div class="message">
+                <span class="text-danger"></span>
+              </div>
+              <input type="hidden" name="csrfmiddlewaretoken" value="RZSWnqemTfYI2evCmkS8gdTbN7Bxan6p5ChS4wqOTRXKPY0QHscMAagPOIPsCOeB">
+              <div class="flex-left units-gap">
+                <label class="unit-0 text-right" for="multiple-inputs-name">邮箱: </label>
+                <div class="unit">
+                  <input type="email" name="email" id="id_email" placeholder="请输入绑定邮箱">
+                </div>
+                <div class="unit-0">
+                  <button class="btn" id="js-send" type="button" data-target="/comments/ajax_verification_code/">
+                    发送验证码
+                  </button>
+                </div>
+              </div>
+              <div class="flex-left units-gap">
+                <label class="unit-0 text-right" for="multiple-inputs-name">验证码: </label>
+                <div class="unit">
+                  <input type="text" name="verification_code" id="id_verification_code" placeholder="请输入接收到的验证码">
+                </div>
+              </div>
+              <div class="flex-right">
+                <button type="button" class="btn btn-danger mr-3" data-dismiss="modal">关闭
+                </button>
+                <button type="submit" class="btn btn-primary" id="js-submit">
+                  设置
+                </button>
+              </div>
+            </form>
+          </div>
+        </div><!-- /.modal-content -->
+      </div><!-- /.modal -->
+    </div>
+    <div class="flex-left flex-wrap units-gap-big" style="margin-top: 60px">
+      
+  <main class="unit-3-4 unit-1-on-mobile top-gap">
+    
+
+
+<div class="bg-white card post-card px-7 py-5">
+  
+<article class="post">
+  <h1 class="top-gap-0">一种自顶而下的Python装饰器设计方法</h1>
+  <ul class="list-inline dot-divider post-meta">
+    <li class="list-inline-item text-small text-muted">
+      4&nbsp;月，3&nbsp;周前
+    </li>
+    <li class="list-inline-item text-small text-muted">7205 字
+    </li>
+    <li class="list-inline-item text-small text-muted">
+      2010 阅读
+    </li>
+    <li class="list-inline-item text-small text-muted">
+      23 评论
+    </li>
+  </ul>
+  <div class="top-gap-big post-body">
+    <p>装饰器是 Python 的一种重要编程实践，然而如果没有掌握其原理和适当的方法，写 Python 装饰器时就可能遇到各种困难。犹记得当年校招时应聘今日头条 Python 开发岗位，因一道 Python 装饰器的设计问题而止于终面，非常遗憾。随着编程技术的提升以及对 Python 装饰器更加深入的理解，我逐渐总结出一套自顶而下的装饰器设计方法，这个方法能够指导我们轻松写出各种类型的装饰器，再也不用像以前那样死记硬背装饰器的模板代码。</p>
+<h2 id="python装饰器原理">Python装饰器原理</h2>
+<p>下面是 Python 装饰器的常规写法：</p>
+<div class="codehilite"><pre><span></span><span class="nd">@decorator</span>
+<span class="k">def</span> <span class="nf">func</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="n">do_something</span><span class="p">()</span>
+</pre></div>
+
+
+<p>这种写法只是一种语法糖，使得代码看起来更加简洁而已，在 Python 解释器内部，函数 <code>func</code> 的调用被转换为下面的方式：</p>
+<div class="codehilite"><pre><span></span><span class="o">&gt;&gt;&gt;</span> <span class="n">func</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="s1">'value'</span><span class="p">)</span>
+<span class="c1"># 等价于</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">decorated_func</span> <span class="o">=</span> <span class="n">decorator</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">decorated_func</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="s1">'value'</span><span class="p">)</span>
+</pre></div>
+
+
+<p>可见，装饰器 <code>decorator</code> 是一个函数（当然也可以是一个类），它接收被装饰的函数 <code>func</code> 作为唯一的参数，然后返回一个 callable（可调用对象），对被装饰函数 <code>func</code> 的调用实际上是对返回的 callable 对象的调用。</p>
+<h2 id="自顶而下设计装饰器">自顶而下设计装饰器</h2>
+<p>从原理分析可见，如果我们要设计一个装饰器，将原始的函数（或类）装饰成一个功能更加强大的函数（或类），那么我们要做的就是要<strong>写一个函数（或类），其被调用后返回我们需要的那个功能更加强大的函数（或类）</strong>。</p>
+<h3 id="简单装饰器">简单装饰器</h3>
+<p>简单的装饰器函数就像上面介绍的那样，不带任何参数。假设我们要设计一个装饰器函数，其功能是能使得被装饰的函数调用结束后，打印出函数运行时间，我们来看看使用自顶而下的方法来设计这个装饰器该怎么做。</p>
+<p>所谓“顶”，就是先不关注实现细节，而是做好整体设计和分解函数调用过程。我们把装饰器命名为 <code>timethis</code>，其使用方法像下面这样：</p>
+<div class="codehilite"><pre><span></span><span class="nd">@timethis</span>
+<span class="k">def</span> <span class="nf">fun</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">pass</span>
+</pre></div>
+
+
+<p>分解对被装饰函数 <code>fun</code> 的调用过程：</p>
+<div class="codehilite"><pre><span></span><span class="o">&gt;&gt;&gt;</span> <span class="n">func</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+<span class="c1"># 等价于</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">decorated_func</span> <span class="o">=</span> <span class="n">timethis</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">decorated_func</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="s1">'value'</span><span class="p">)</span>
+</pre></div>
+
+
+<p>由此可见，我们的装饰器 <code>timethis</code> 应该接收被装饰的函数作为唯一参数，返回一个函数对象，根据惯例，返回的函数命名为 <code>wrapper</code>，因此可以写出 <code>timethis</code> 装饰器的模板代码：</p>
+<div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">timethis</span><span class="p">(</span><span class="n">func</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">wrapper</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">pass</span>
+
+    <span class="k">return</span> <span class="n">wrapper</span>
+</pre></div>
+
+
+<p>装饰器的框架搭好了，接下来就是“下”，丰富函数逻辑。</p>
+<p>对被装饰的函数调用等价于对 <code>wrapper</code> 函数的调用，为了使 <code>wrapper</code> 调用返回和被装饰函数调用一样的结果，我们可以在 <code>wrapper</code> 中调用原函数并返回其调用结果：</p>
+<div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">timethis</span><span class="p">(</span><span class="n">func</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">wrapper</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">func</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">result</span>
+    <span class="k">return</span> <span class="n">wrapper</span>
+</pre></div>
+
+
+<p>可以随意丰富 <code>wrapper</code> 函数的逻辑，我们的需求是打印 <code>func</code> 的调用时间，只需在 <code>func</code> 调用前后计时即可：</p>
+<div class="codehilite"><pre><span></span><span class="kn">import</span> <span class="nn">time</span>
+
+<span class="k">def</span> <span class="nf">timethis</span><span class="p">(</span><span class="n">func</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">wrapper</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">start</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">func</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">end</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+        <span class="k">print</span><span class="p">(</span><span class="n">func</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="n">end</span><span class="o">-</span><span class="n">start</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">result</span>
+    <span class="k">return</span> <span class="n">wrapper</span>
+</pre></div>
+
+
+<p>由此，一个可以打印函数调用时间的装饰器就完成了，来看看使用效果：</p>
+<div class="codehilite"><pre><span></span><span class="nd">@timethis</span>
+<span class="k">def</span> <span class="nf">fibonacci</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
+    <span class="sd">"""</span>
+<span class="sd">    求斐波拉契数列第 n 项的值</span>
+<span class="sd">    """</span>
+    <span class="n">a</span> <span class="o">=</span> <span class="n">b</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="k">while</span> <span class="n">n</span> <span class="o">&gt;</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="n">a</span><span class="p">,</span> <span class="n">b</span> <span class="o">=</span> <span class="n">b</span><span class="p">,</span> <span class="n">a</span> <span class="o">+</span> <span class="n">b</span>
+        <span class="n">n</span> <span class="o">-=</span> <span class="mi">1</span>
+    <span class="k">return</span> <span class="n">b</span>
+
+<span class="o">&gt;&gt;&gt;</span> <span class="n">fibonacci</span><span class="p">(</span><span class="mi">10000</span><span class="p">)</span>
+<span class="n">fibonacci</span> <span class="mf">0.004000663757324219</span>
+<span class="o">...</span><span class="err">结果太大省略</span>
+</pre></div>
+
+
+<p>基本上看上去没有问题了，不过由于函数被装饰了，因此被装饰函数的基本信息变成了装饰器返回的 <code>wrapper</code> 函数的信息：</p>
+<div class="codehilite"><pre><span></span><span class="o">&gt;&gt;&gt;</span> <span class="n">fibonacci</span><span class="o">.</span><span class="vm">__name__</span>
+<span class="n">wrapper</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">fibonacci</span><span class="o">.</span><span class="vm">__doc__</span>
+<span class="bp">None</span>
+</pre></div>
+
+
+<blockquote>
+<p>注意这里 <code>fibonacci.__name__</code> 等价于 <code>timethis(fibonacci).__name__</code>，所以返回值为 wrapper。</p>
+</blockquote>
+<p>修正方法也很简单，需要使用标准库中提供的一个 <code>wraps</code> 装饰器，将被装饰函数的信息复制给 <code>wrapper</code> 函数：</p>
+<div class="codehilite"><pre><span></span><span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">wraps</span>
+<span class="kn">import</span> <span class="nn">time</span>
+
+<span class="k">def</span> <span class="nf">timethis</span><span class="p">(</span><span class="n">func</span><span class="p">):</span>
+    <span class="nd">@wraps</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">wrapper</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">start</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">func</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">end</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+        <span class="k">print</span><span class="p">(</span><span class="n">func</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="n">end</span> <span class="o">-</span> <span class="n">start</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">result</span>
+
+    <span class="k">return</span> <span class="n">wrapper</span>
+</pre></div>
+
+
+<p>至此，一个完整的，不带参数的装饰器便写好了。</p>
+<h3 id="带参数的装饰器">带参数的装饰器</h3>
+<p>上面设计的装饰器比较简单，不带任何参数。我们也会经常看到带参数的装饰器，其使用方法大概如下：</p>
+<div class="codehilite"><pre><span></span><span class="nd">@logged</span><span class="p">(</span><span class="s1">'debug'</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">'example'</span><span class="p">,</span> <span class="n">message</span><span class="o">=</span><span class="s1">'message'</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">fun</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">pass</span>
+</pre></div>
+
+
+<p>分解对被装饰函数 <code>fun</code> 的调用过程：</p>
+<div class="codehilite"><pre><span></span><span class="o">&gt;&gt;&gt;</span> <span class="n">func</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="s1">'value'</span><span class="p">)</span>
+<span class="c1"># 等价于</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">decorator</span> <span class="o">=</span> <span class="n">logged</span><span class="p">(</span><span class="s1">'debug'</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">'example'</span><span class="p">,</span> <span class="n">message</span><span class="o">=</span><span class="s1">'message'</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">decorated_func</span> <span class="o">=</span> <span class="n">decorator</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">decorated_func</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="s1">'value'</span><span class="p">)</span>
+</pre></div>
+
+
+<p>由此可见，<code>logged</code> 是一个函数，它返回一个装饰器，这个返回的装饰器再去装饰 <code>func</code> 函数，因此 <code>logged</code> 的模板代码应该像这样：</p>
+<div class="codehilite"><pre><span></span><span class="k">def</span> <span class="nf">logged</span><span class="p">(</span><span class="n">level</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">message</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">decorator</span><span class="p">(</span><span class="n">func</span><span class="p">):</span>
+        <span class="nd">@wraps</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>
+        <span class="k">def</span> <span class="nf">wrapper</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+            <span class="k">pass</span>
+        <span class="k">return</span> <span class="n">wrapper</span>
+    <span class="k">return</span> <span class="n">decorator</span>
+</pre></div>
+
+
+<p><code>wrapper</code> 是最终被调用的函数，我们可以随意丰富完善 <code>decorator</code> 和 <code>wrapper</code> 的逻辑。假设我们的需求是被装饰函数 <code>func</code> 被调用前打印一行 log 日志，代码如下：</p>
+<div class="codehilite"><pre><span></span><span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">wraps</span>
+
+<span class="k">def</span> <span class="nf">logged</span><span class="p">(</span><span class="n">level</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">message</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">decorator</span><span class="p">(</span><span class="n">func</span><span class="p">):</span>
+        <span class="n">logname</span> <span class="o">=</span> <span class="n">name</span> <span class="k">if</span> <span class="n">name</span> <span class="k">else</span> <span class="n">func</span><span class="o">.</span><span class="vm">__module__</span>
+        <span class="n">logmsg</span> <span class="o">=</span> <span class="n">message</span> <span class="k">if</span> <span class="n">message</span> <span class="k">else</span> <span class="n">func</span><span class="o">.</span><span class="vm">__name__</span>
+
+        <span class="nd">@wraps</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>
+        <span class="k">def</span> <span class="nf">wrapper</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+            <span class="k">print</span><span class="p">(</span><span class="n">level</span><span class="p">,</span> <span class="n">logname</span><span class="p">,</span> <span class="n">logmsg</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s1">' - '</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">func</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">wrapper</span>
+    <span class="k">return</span> <span class="n">decorator</span>
+</pre></div>
+
+
+<h3 id="多功能装饰器">多功能装饰器</h3>
+<p>有时候，我们也会看到同一个装饰器有两种使用方法，可以像简单装饰器一样使用，也可以传递参数。例如：</p>
+<div class="codehilite"><pre><span></span><span class="nd">@logged</span>
+<span class="k">def</span> <span class="nf">func</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">pass</span>
+
+<span class="nd">@logged</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="s1">'debug'</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">'example'</span><span class="p">,</span> <span class="n">message</span><span class="o">=</span><span class="s1">'message'</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">fun</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">pass</span>
+</pre></div>
+
+
+<p>根据前面的分析，不带参数的装饰器和带参数的装饰器定义是不同的。不带参数的装饰器返回的是被装饰后的函数，带参数的装饰器返回的是一个不带参数的装饰器，然后这个返回的不带参数的装饰器再返回被装饰后的函数。那么怎么统一呢？先来分析一下两种装饰器用法的调用过程。</p>
+<div class="codehilite"><pre><span></span><span class="c1"># 使用 @logged 直接装饰</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">func</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="s1">'value'</span><span class="p">)</span>
+<span class="c1"># 等价于</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">decorated_func</span> <span class="o">=</span> <span class="n">logged</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">decorated_func</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="s1">'value'</span><span class="p">)</span>
+
+<span class="c1"># 使用 @logged(level='debug', name='example', message='message') 装饰</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">func</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="s1">'value'</span><span class="p">)</span>
+<span class="c1"># 等价于</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">decorator</span> <span class="o">=</span> <span class="n">logged</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="s1">'debug'</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">'example'</span><span class="p">,</span> <span class="n">message</span><span class="o">=</span><span class="s1">'message'</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">decorated_func</span> <span class="o">=</span> <span class="n">decorator</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">decorated_func</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="s1">'value'</span><span class="p">)</span>
+</pre></div>
+
+
+<p>可以看到，第二种装饰器比第一种装饰器多了一步，就是调用装饰器函数再返回一个装饰器，这个返回的装饰器和不带参数的装饰器是一样的：接收被装饰的函数作为唯一参数。唯一的区别是返回的装饰器携带固定参数，固定函数参数正是 <code>partial</code> 函数的使用场景，因此我们可以定义如下的装饰器：</p>
+<div class="codehilite"><pre><span></span><span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">wraps</span><span class="p">,</span> <span class="n">partial</span>
+
+<span class="k">def</span> <span class="nf">logged</span><span class="p">(</span><span class="n">func</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="s1">'debug'</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">message</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">func</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">partial</span><span class="p">(</span><span class="n">logged</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="n">level</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">message</span><span class="o">=</span><span class="n">message</span><span class="p">)</span>
+
+    <span class="n">logname</span> <span class="o">=</span> <span class="n">name</span> <span class="k">if</span> <span class="n">name</span> <span class="k">else</span> <span class="n">func</span><span class="o">.</span><span class="vm">__module__</span>
+    <span class="n">logmsg</span> <span class="o">=</span> <span class="n">message</span> <span class="k">if</span> <span class="n">message</span> <span class="k">else</span> <span class="n">func</span><span class="o">.</span><span class="vm">__name__</span>
+
+    <span class="nd">@wraps</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">wrapper</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">print</span><span class="p">(</span><span class="n">level</span><span class="p">,</span> <span class="n">logname</span><span class="p">,</span> <span class="n">logmsg</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s1">' - '</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">func</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">wrapper</span>
+</pre></div>
+
+
+<p>实现的关键在于，若这个装饰器以带参数的形式使用，这第一个参数 <code>func</code> 的值为 <code>None</code>，此时我们使用 <code>partial</code> 返回了一个其它参数固定的装饰器，这个装饰器与不带参数的简装饰器一样，接收被装饰的函数对象作为唯一参数，然后返回被装饰后的函数对象。</p>
+<h3 id="装饰类">装饰类</h3>
+<p>由于类的实例化和函数调用非常类似，因此装饰器函数也可以用于装饰类，只是此时装饰器函数的第一个参数不再是函数，而是类。基于自顶而下的设计方法，设计一个用于装饰类的装饰器函数就是轻而易举的事情，这里不再给出示例。</p>
+<h2 id="练习">练习</h2>
+<p>最后，以当时今日头条的面试题作为一个练习。现在看来这道题只是一个简单的装饰器设计需求，只怪自己学艺不精，后悔没有早点掌握装饰器的设计方法。</p>
+<blockquote>
+<p>题目：</p>
+<p>设计一个装饰器函数 <code>retry</code>，当被装饰的函数调用抛出指定的异常时，函数会被重新调用，直到达到指定的最大调用次数才重新抛出指定的异常。装饰器的使用示例如下：</p>
+<p><code>python
+@retry(times=10, traced_exceptions=ValueError, reraised_exception=CustomException)
+def str2int(s):
+    pass</code></p>
+<p><code>times</code> 为函数被重新调用的最大尝试次数。</p>
+<p><code>traced_exceptions</code> 为监控的异常，可以为 None（默认）、异常类、或者一个异常类的列表。如果为 None，则监控所有的异常；如果指定了异常类，则若函数调用抛出指定的异常时，重新调用函数，直至成功返回结果或者达到最大尝试次数，此时重新抛出原异常（<code>reraised_exception</code> 的值为 <code>None</code>），或者抛出由 <code>reraised_exception</code> 指定的异常。</p>
+</blockquote>
+<p><strong>参考代码</strong></p>
+<p>要注意实现方式不止一种，以下是我的实现版本：</p>
+<div class="codehilite"><pre><span></span><span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">wraps</span>
+
+<span class="k">def</span> <span class="nf">retry</span><span class="p">(</span><span class="n">times</span><span class="p">,</span> <span class="n">traced_exceptions</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">reraise_exception</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">decorator</span><span class="p">(</span><span class="n">func</span><span class="p">):</span>
+
+        <span class="nd">@wraps</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>
+        <span class="k">def</span> <span class="nf">wrapper</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+            <span class="n">n</span> <span class="o">=</span> <span class="n">times</span>
+            <span class="n">trace_all</span> <span class="o">=</span> <span class="n">traced_exceptions</span> <span class="ow">is</span> <span class="bp">None</span>
+            <span class="n">trace_specified</span> <span class="o">=</span> <span class="n">traced_exceptions</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span>
+            <span class="k">while</span> <span class="bp">True</span><span class="p">:</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="n">func</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                    <span class="n">traced</span> <span class="o">=</span> <span class="n">trace_specified</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">e</span><span class="p">,</span> <span class="n">traced_exceptions</span><span class="p">)</span>
+                    <span class="n">reach_limit</span> <span class="o">=</span> <span class="n">n</span> <span class="o">==</span> <span class="mi">0</span>
+
+                    <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">trace_all</span> <span class="ow">or</span> <span class="n">traced</span><span class="p">)</span> <span class="ow">or</span> <span class="n">reach_limit</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="n">reraise_exception</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                            <span class="k">raise</span> <span class="n">reraise_exception</span>
+                        <span class="k">raise</span>
+                    <span class="n">n</span> <span class="o">-=</span> <span class="mi">1</span>
+        <span class="k">return</span> <span class="n">wrapper</span>
+    <span class="k">return</span> <span class="n">decorator</span>
+</pre></div>
+
+
+<h2 id="总结">总结</h2>
+<p>总结一下，自定而下设计装饰器分以下几个步骤</p>
+<ol>
+<li>确定你的装饰器该如何使用，带参数或者不带参数，还是都可以。</li>
+<li>将 @ 语法糖分解为装饰器的实际调用过程。</li>
+<li>根据装饰的调用过程，写出对应的模板代码。</li>
+<li>根据需求编写装饰器函数和装饰后函数的逻辑。</li>
+<li>完工！</li>
+</ol>
+<blockquote>
+<p>我分享编程感悟与学习资料的公众号，敬请关注：<strong>程序员甜甜圈</strong></p>
+</blockquote>
+    <p class="text-center">
+      -- EOF --
+    </p>
+    <div>
+      <button class="btn btn-primary" id="js-reward"><i class="fa fa-jpy" aria-hidden="true"></i>
+        如果觉得文章对你有帮助，请随意打赏
+        <i class="fa fa-chevron-down" aria-hidden="true"></i>
+      </button>
+      <div class="flex-left flex-wrap units-gap-big mt-4" style="display: none">
+        <div class="unit unit-1-on-mobile flex-center">
+          <figure>
+            <img src="./一种自顶而下的Python装饰器设计方法_追梦人物的博客_files/weixinpay.jpg" alt="微信支付收款二维码" style="width: 250px">
+            <figcaption class="text-center fs-6 mt-2" style="color: green">微信</figcaption>
+          </figure>
+        </div>
+        <div class="unit unit-1-on-mobile flex-center">
+          <figure>
+            <img src="./一种自顶而下的Python装饰器设计方法_追梦人物的博客_files/alipay.jpg" alt="支付宝收款二维码" style="width: 250px">
+            <figcaption class="text-center fs-6 mt-2 text-primary">支付宝</figcaption>
+          </figure>
+        </div>
+      </div>
+    </div>
+    <div class="post-tags">
+      <ul class="list-inline">
+        
+      </ul>
+    </div>
+  </div>
+</article>
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  <script type="text/javascript">
+      var jiathis_config = {data_track_clickback: 'true'};
+  </script>
+  <script type="text/javascript" src="./一种自顶而下的Python装饰器设计方法_追梦人物的博客_files/jia.js.下载" charset="utf-8"></script>
+  <!-- JiaThis Button END -->
+</div>
+<br>
+<div class="top-gap clearfix">
+  
+    <a href="https://www.zmrenwu.com/post/86/">
+      <i class="fa fa-angle-double-left" aria-hidden="true"></i>
+      Python提取支付宝和微信支付二维码
+    </a>
+  
+  
+</div>
+
+  <div class="top-gap-big card">
+    <div class="card-header">相关文章</div>
+    <div class="card-body">
+      
+      <ul class="mt-0">
+        
+          <li class="mt-1"><a class="text-small" href="https://www.zmrenwu.com/post/87/"></a>
+          </li>
+        
+          <li class="mt-1"><a class="text-small" href="https://www.zmrenwu.com/post/28/">Django 博客文章自动生成摘要的两种方法</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+<section class="comment-area top-gap-big" id="comment-area">
+  <h5>23 条评论 / 11 人参与</h5>
+  
+    
+<div class="flex-center top-gap login-panel p-7">
+  <div>
+    <div class="text-muted text-center login-header"><span>登录后回复</span></div>
+    <div class="flex-center text-center social-icons mt-3">
+                        <span class="weibo mr-3">
+                            <a href="https://www.zmrenwu.com/accounts/weibo/login/">
+                                <i class="fab fa-weibo"></i>
+                            </a>
+                        </span>
+      <span class="github">
+                            <a href="https://www.zmrenwu.com/accounts/github/login/">
+                                <i class="fab fa-github"></i>
+                            </a>
+                        </span>
+    </div>
+  </div>
+</div>
+  
+  
+<div class="top-gap-big comment-list">
+  
+  <nav class="pagination list-inline">
+    
+    
+      <a href="https://www.zmrenwu.com/post/87/?comment_page=1#comment-area" class="current">1</a>
+    
+    
+  </nav>
+  
+    <div class="flex-left py-4" id="c3495">
+      <div class="unit-0">
+        <img class="comment-avatar mr-3" src="./一种自顶而下的Python装饰器设计方法_追梦人物的博客_files/006BtKnLly8fn99pso6suj30ro0rowg9.jpg">
+      </div>
+      <div class="unit">
+        <div class="comment-main">
+  <header class="comment-user">
+        <span class="text-small text-muted nickname">Mysterious_fate
+          
+        </span>
+    
+  </header>
+  <div class="comment-body">
+    <ol><li>这儿能排序吗<br></li><li>试试试试</li></ol>
+  </div>
+  <footer class="comment-footer flex-left">
+    <ul class="unit list-inline dot-divider">
+      <li class="list-inline-item">
+        <time class="text-small text-muted">5&nbsp;日，8&nbsp;小时前</time>
+      </li>
+      <li class="list-inline-item">
+        <a href="https://www.zmrenwu.com/comments/reply/3495" class="reply-btn text-small text-muted">回复</a>
+        
+      </li>
+    </ul>
+  </footer>
+</div>
+        
+          <hr class="">
+        
+        <div class="comment-descendant-list">
+          
+            <div class="flex-left py-4" id="c3496">
+              <div class="unit-0">
+                <img class="comment-avatar mr-3" src="./一种自顶而下的Python装饰器设计方法_追梦人物的博客_files/006BtKnLly8fn99pso6suj30ro0rowg9.jpg">
+              </div>
+              <div class="unit">
+                
+  <div class="comment-main">
+  <header class="comment-user">
+        <span class="text-small text-muted nickname">Mysterious_fate
+          
+        </span>
+    
+    <span class="reply-label text-small text-muted">
+                                                        <i class="fa fa-share" aria-hidden="true"></i>
+                                                    </span>
+    <span class="nickname text-small text-muted">Mysterious_fate
+        
+
+  </span></header>
+  <div class="comment-body">
+    <p>为什么我的不行。。。没有序号，list-style: none 已经去掉了！</p>
+  </div>
+  <footer class="comment-footer flex-left">
+    <ul class="unit list-inline dot-divider">
+      <li class="list-inline-item">
+        <time class="text-small text-muted">5&nbsp;日，8&nbsp;小时前</time>
+      </li>
+      <li class="list-inline-item">
+        <a href="https://www.zmrenwu.com/comments/reply/3496" class="reply-btn text-small text-muted">回复</a>
+        
+      </li>
+    </ul>
+  </footer>
+</div>
+
+              </div>
+            </div>
+            
+          
+        </div>
+      </div>
+    </div>
+    
+      <hr class="m-0">
+    
+  
+    <div class="flex-left py-4" id="c3494">
+      <div class="unit-0">
+        <img class="comment-avatar mr-3" src="./一种自顶而下的Python装饰器设计方法_追梦人物的博客_files/006BtKnLly8fn99pso6suj30ro0rowg9.jpg">
+      </div>
+      <div class="unit">
+        <div class="comment-main">
+  <header class="comment-user">
+        <span class="text-small text-muted nickname">Mysterious_fate
+          
+        </span>
+    
+  </header>
+  <div class="comment-body">
+    <p>试一试评论</p>
+  </div>
+  <footer class="comment-footer flex-left">
+    <ul class="unit list-inline dot-divider">
+      <li class="list-inline-item">
+        <time class="text-small text-muted">5&nbsp;日，10&nbsp;小时前</time>
+      </li>
+      <li class="list-inline-item">
+        <a href="https://www.zmrenwu.com/comments/reply/3494" class="reply-btn text-small text-muted">回复</a>
+        
+      </li>
+    </ul>
+  </footer>
+</div>
+        
+        <div class="comment-descendant-list">
+          
+        </div>
+      </div>
+    </div>
+    
+      <hr class="m-0">
+    
+  
+    <div class="flex-left py-4" id="c3480">
+      <div class="unit-0">
+        <img class="comment-avatar mr-3" src="./一种自顶而下的Python装饰器设计方法_追梦人物的博客_files/35067857">
+      </div>
+      <div class="unit">
+        <div class="comment-main">
+  <header class="comment-user">
+        <span class="text-small text-muted nickname">BlueMrD
+          
+        </span>
+    
+  </header>
+  <div class="comment-body">
+    <p>想问一下第三方登录功能是用的什么库？</p>
+  </div>
+  <footer class="comment-footer flex-left">
+    <ul class="unit list-inline dot-divider">
+      <li class="list-inline-item">
+        <time class="text-small text-muted">3&nbsp;周，2&nbsp;日前</time>
+      </li>
+      <li class="list-inline-item">
+        <a href="https://www.zmrenwu.com/comments/reply/3480" class="reply-btn text-small text-muted">回复</a>
+        
+      </li>
+    </ul>
+  </footer>
+</div>
+        
+          <hr class="">
+        
+        <div class="comment-descendant-list">
+          
+            <div class="flex-left py-4" id="c3493">
+              <div class="unit-0">
+                <img class="comment-avatar mr-3" src="./一种自顶而下的Python装饰器设计方法_追梦人物的博客_files/006BtKnLly8fn99pso6suj30ro0rowg9.jpg">
+              </div>
+              <div class="unit">
+                
+  <div class="comment-main">
+  <header class="comment-user">
+        <span class="text-small text-muted nickname">Mysterious_fate
+          
+        </span>
+    
+    <span class="reply-label text-small text-muted">
+                                                        <i class="fa fa-share" aria-hidden="true"></i>
+                                                    </span>
+    <span class="nickname text-small text-muted">BlueMrD
+        
+
+  </span></header>
+  <div class="comment-body">
+    <p>第三方登陆要去比如微博那里申请的，腾讯就去腾讯申请，你可以参考一下<a href="https://www.bilibili.com/video/av40358958" target="_self">用QQ登陆我们的连接</a></p>
+  </div>
+  <footer class="comment-footer flex-left">
+    <ul class="unit list-inline dot-divider">
+      <li class="list-inline-item">
+        <time class="text-small text-muted">6&nbsp;日，1&nbsp;小时前</time>
+      </li>
+      <li class="list-inline-item">
+        <a href="https://www.zmrenwu.com/comments/reply/3493" class="reply-btn text-small text-muted">回复</a>
+        
+      </li>
+    </ul>
+  </footer>
+</div>
+
+              </div>
+            </div>
+            
+          
+        </div>
+      </div>
+    </div>
+    
+      <hr class="m-0">
+    
+  
+    <div class="flex-left py-4" id="c3433">
+      <div class="unit-0">
+        <img class="comment-avatar mr-3" src="./一种自顶而下的Python装饰器设计方法_追梦人物的博客_files/29685944">
+      </div>
+      <div class="unit">
+        <div class="comment-main">
+  <header class="comment-user">
+        <span class="text-small text-muted nickname">somenzz_github
+          
+        </span>
+    
+  </header>
+  <div class="comment-body">
+    <p>您说：</p><p>&gt;从原理分析可见，如果我们要设计一个装饰器，将原始的函数（或类）装饰成一个功能更加强大的函数（或类），那么我们要做的就是要写一个函数（或类），其被调用后返回我们需要的那个功能更加强大的函数（或类）<br></p><p><br></p><p>能否讲讲如何使用装饰器装饰一个类呢？&nbsp;</p>
+  </div>
+  <footer class="comment-footer flex-left">
+    <ul class="unit list-inline dot-divider">
+      <li class="list-inline-item">
+        <time class="text-small text-muted">2&nbsp;月，4&nbsp;周前</time>
+      </li>
+      <li class="list-inline-item">
+        <a href="https://www.zmrenwu.com/comments/reply/3433" class="reply-btn text-small text-muted">回复</a>
+        
+      </li>
+    </ul>
+  </footer>
+</div>
+        
+          <hr class="">
+        
+        <div class="comment-descendant-list">
+          
+            <div class="flex-left py-4" id="c3497">
+              <div class="unit-0">
+                <img class="comment-avatar mr-3" src="./一种自顶而下的Python装饰器设计方法_追梦人物的博客_files/006BtKnLly8fn99pso6suj30ro0rowg9.jpg">
+              </div>
+              <div class="unit">
+                
+  <div class="comment-main">
+  <header class="comment-user">
+        <span class="text-small text-muted nickname">Mysterious_fate
+          
+        </span>
+    
+    <span class="reply-label text-small text-muted">
+                                                        <i class="fa fa-share" aria-hidden="true"></i>
+                                                    </span>
+    <span class="nickname text-small text-muted">somenzz_github
+        
+
+  </span></header>
+  <div class="comment-body">
+    <p>这个网上搜一下很多的，百度一下你就知道</p>
+  </div>
+  <footer class="comment-footer flex-left">
+    <ul class="unit list-inline dot-divider">
+      <li class="list-inline-item">
+        <time class="text-small text-muted">5&nbsp;日，8&nbsp;小时前</time>
+      </li>
+      <li class="list-inline-item">
+        <a href="https://www.zmrenwu.com/comments/reply/3497" class="reply-btn text-small text-muted">回复</a>
+        
+      </li>
+    </ul>
+  </footer>
+</div>
+
+              </div>
+            </div>
+            
+          
+        </div>
+      </div>
+    </div>
+    
+      <hr class="m-0">
+    
+  
+    <div class="flex-left py-4" id="c3415">
+      <div class="unit-0">
+        <img class="comment-avatar mr-3" src="./一种自顶而下的Python装饰器设计方法_追梦人物的博客_files/62971276jw8fakt9m1i3kj20c70c70we.jpg">
+      </div>
+      <div class="unit">
+        <div class="comment-main">
+  <header class="comment-user">
+        <span class="text-small text-muted nickname">rogwan
+          
+        </span>
+    
+  </header>
+  <div class="comment-body">
+    <p>评论代码可以高亮吗？</p><pre><code class="lang-python">def foo():<br>    pass<br>    return 'OK'</code></pre>
+  </div>
+  <footer class="comment-footer flex-left">
+    <ul class="unit list-inline dot-divider">
+      <li class="list-inline-item">
+        <time class="text-small text-muted">3&nbsp;月，2&nbsp;周前</time>
+      </li>
+      <li class="list-inline-item">
+        <a href="https://www.zmrenwu.com/comments/reply/3415" class="reply-btn text-small text-muted">回复</a>
+        
+      </li>
+    </ul>
+  </footer>
+</div>
+        
+          <hr class="">
+        
+        <div class="comment-descendant-list">
+          
+            <div class="flex-left py-4" id="c3416">
+              <div class="unit-0">
+                <img class="comment-avatar mr-3" src="./一种自顶而下的Python装饰器设计方法_追梦人物的博客_files/b51e321bjw8fc4a3cit53j20hs0hn0tr.jpg">
+              </div>
+              <div class="unit">
+                
+  <div class="comment-main">
+  <header class="comment-user">
+        <span class="text-small text-muted nickname">Cxy-1991
+          
+        </span>
+    
+    <span class="reply-label text-small text-muted">
+                                                        <i class="fa fa-share" aria-hidden="true"></i>
+                                                    </span>
+    <span class="nickname text-small text-muted">rogwan
+        
+
+  </span></header>
+  <div class="comment-body">
+    <p>111</p>
+  </div>
+  <footer class="comment-footer flex-left">
+    <ul class="unit list-inline dot-divider">
+      <li class="list-inline-item">
+        <time class="text-small text-muted">3&nbsp;月，2&nbsp;周前</time>
+      </li>
+      <li class="list-inline-item">
+        <a href="https://www.zmrenwu.com/comments/reply/3416" class="reply-btn text-small text-muted">回复</a>
+        
+      </li>
+    </ul>
+  </footer>
+</div>
+
+              </div>
+            </div>
+            
+              <hr class="m-0">
+            
+          
+            <div class="flex-left py-4" id="c3486">
+              <div class="unit-0">
+                <img class="comment-avatar mr-3" src="./一种自顶而下的Python装饰器设计方法_追梦人物的博客_files/17638267">
+              </div>
+              <div class="unit">
+                
+  <div class="comment-main">
+  <header class="comment-user">
+        <span class="text-small text-muted nickname">陈新明
+          
+        </span>
+    
+    <span class="reply-label text-small text-muted">
+                                                        <i class="fa fa-share" aria-hidden="true"></i>
+                                                    </span>
+    <span class="nickname text-small text-muted">Cxy-1991
+        
+
+  </span></header>
+  <div class="comment-body">
+    <p>好像不可以</p>
+  </div>
+  <footer class="comment-footer flex-left">
+    <ul class="unit list-inline dot-divider">
+      <li class="list-inline-item">
+        <time class="text-small text-muted">1&nbsp;周，3&nbsp;日前</time>
+      </li>
+      <li class="list-inline-item">
+        <a href="https://www.zmrenwu.com/comments/reply/3486" class="reply-btn text-small text-muted">回复</a>
+        
+      </li>
+    </ul>
+  </footer>
+</div>
+
+              </div>
+            </div>
+            
+              <hr class="m-0">
+            
+          
+            <div class="flex-left py-4" id="c3487">
+              <div class="unit-0">
+                <img class="comment-avatar mr-3" src="./一种自顶而下的Python装饰器设计方法_追梦人物的博客_files/17638267">
+              </div>
+              <div class="unit">
+                
+  <div class="comment-main">
+  <header class="comment-user">
+        <span class="text-small text-muted nickname">陈新明
+          
+        </span>
+    
+    <span class="reply-label text-small text-muted">
+                                                        <i class="fa fa-share" aria-hidden="true"></i>
+                                                    </span>
+    <span class="nickname text-small text-muted">rogwan
+        
+
+  </span></header>
+  <div class="comment-body">
+    <p>这的不可以</p>
+  </div>
+  <footer class="comment-footer flex-left">
+    <ul class="unit list-inline dot-divider">
+      <li class="list-inline-item">
+        <time class="text-small text-muted">1&nbsp;周，3&nbsp;日前</time>
+      </li>
+      <li class="list-inline-item">
+        <a href="https://www.zmrenwu.com/comments/reply/3487" class="reply-btn text-small text-muted">回复</a>
+        
+      </li>
+    </ul>
+  </footer>
+</div>
+
+              </div>
+            </div>
+            
+              <hr class="m-0">
+            
+          
+            <div class="flex-left py-4" id="c3488">
+              <div class="unit-0">
+                <img class="comment-avatar mr-3" src="./一种自顶而下的Python装饰器设计方法_追梦人物的博客_files/17638267">
+              </div>
+              <div class="unit">
+                
+  <div class="comment-main">
+  <header class="comment-user">
+        <span class="text-small text-muted nickname">陈新明
+          
+        </span>
+    
+    <span class="reply-label text-small text-muted">
+                                                        <i class="fa fa-share" aria-hidden="true"></i>
+                                                    </span>
+    <span class="nickname text-small text-muted">陈新明
+        
+
+  </span></header>
+  <div class="comment-body">
+    <p>恩 是的</p>
+  </div>
+  <footer class="comment-footer flex-left">
+    <ul class="unit list-inline dot-divider">
+      <li class="list-inline-item">
+        <time class="text-small text-muted">1&nbsp;周前</time>
+      </li>
+      <li class="list-inline-item">
+        <a href="https://www.zmrenwu.com/comments/reply/3488" class="reply-btn text-small text-muted">回复</a>
+        
+      </li>
+    </ul>
+  </footer>
+</div>
+
+              </div>
+            </div>
+            
+              <hr class="m-0">
+            
+          
+            <div class="flex-left py-4" id="c3489">
+              <div class="unit-0">
+                <img class="comment-avatar mr-3" src="./一种自顶而下的Python装饰器设计方法_追梦人物的博客_files/17638267">
+              </div>
+              <div class="unit">
+                
+  <div class="comment-main">
+  <header class="comment-user">
+        <span class="text-small text-muted nickname">陈新明
+          
+        </span>
+    
+    <span class="reply-label text-small text-muted">
+                                                        <i class="fa fa-share" aria-hidden="true"></i>
+                                                    </span>
+    <span class="nickname text-small text-muted">陈新明
+        
+
+  </span></header>
+  <div class="comment-body">
+    <p>再来一次</p>
+  </div>
+  <footer class="comment-footer flex-left">
+    <ul class="unit list-inline dot-divider">
+      <li class="list-inline-item">
+        <time class="text-small text-muted">1&nbsp;周前</time>
+      </li>
+      <li class="list-inline-item">
+        <a href="https://www.zmrenwu.com/comments/reply/3489" class="reply-btn text-small text-muted">回复</a>
+        
+      </li>
+    </ul>
+  </footer>
+</div>
+
+              </div>
+            </div>
+            
+          
+        </div>
+      </div>
+    </div>
+    
+      <hr class="m-0">
+    
+  
+    <div class="flex-left py-4" id="c3412">
+      <div class="unit-0">
+        <img class="comment-avatar mr-3" src="./一种自顶而下的Python装饰器设计方法_追梦人物的博客_files/97d03b71ly8fmn6bundkqj20dw0bk0t2.jpg">
+      </div>
+      <div class="unit">
+        <div class="comment-main">
+  <header class="comment-user">
+        <span class="text-small text-muted nickname">东南真的
+          
+        </span>
+    
+  </header>
+  <div class="comment-body">
+    <p>学习了，感谢博主。<br></p>
+  </div>
+  <footer class="comment-footer flex-left">
+    <ul class="unit list-inline dot-divider">
+      <li class="list-inline-item">
+        <time class="text-small text-muted">3&nbsp;月，2&nbsp;周前</time>
+      </li>
+      <li class="list-inline-item">
+        <a href="https://www.zmrenwu.com/comments/reply/3412" class="reply-btn text-small text-muted">回复</a>
+        
+      </li>
+    </ul>
+  </footer>
+</div>
+        
+        <div class="comment-descendant-list">
+          
+        </div>
+      </div>
+    </div>
+    
+      <hr class="m-0">
+    
+  
+    <div class="flex-left py-4" id="c3402">
+      <div class="unit-0">
+        <img class="comment-avatar mr-3" src="./一种自顶而下的Python装饰器设计方法_追梦人物的博客_files/23264534">
+      </div>
+      <div class="unit">
+        <div class="comment-main">
+  <header class="comment-user">
+        <span class="text-small text-muted nickname">Reborn0502
+          
+        </span>
+    
+  </header>
+  <div class="comment-body">
+    <p>博主的评论系统是开源的mptt吗<br><br></p>
+  </div>
+  <footer class="comment-footer flex-left">
+    <ul class="unit list-inline dot-divider">
+      <li class="list-inline-item">
+        <time class="text-small text-muted">3&nbsp;月，3&nbsp;周前</time>
+      </li>
+      <li class="list-inline-item">
+        <a href="https://www.zmrenwu.com/comments/reply/3402" class="reply-btn text-small text-muted">回复</a>
+        
+      </li>
+    </ul>
+  </footer>
+</div>
+        
+          <hr class="">
+        
+        <div class="comment-descendant-list">
+          
+            <div class="flex-left py-4" id="c3406">
+              <div class="unit-0">
+                <img class="comment-avatar mr-3" src="./一种自顶而下的Python装饰器设计方法_追梦人物的博客_files/13174219">
+              </div>
+              <div class="unit">
+                
+  <div class="comment-main">
+  <header class="comment-user">
+        <span class="text-small text-muted nickname">追梦人物
+          
+            <span class="master">[博主]</span>
+          
+        </span>
+    
+    <span class="reply-label text-small text-muted">
+                                                        <i class="fa fa-share" aria-hidden="true"></i>
+                                                    </span>
+    <span class="nickname text-small text-muted">Reborn0502
+        
+
+  </span></header>
+  <div class="comment-body">
+    <p>mptt-comments 是从我博客的评论系统抽取出来的。</p>
+  </div>
+  <footer class="comment-footer flex-left">
+    <ul class="unit list-inline dot-divider">
+      <li class="list-inline-item">
+        <time class="text-small text-muted">3&nbsp;月，3&nbsp;周前</time>
+      </li>
+      <li class="list-inline-item">
+        <a href="https://www.zmrenwu.com/comments/reply/3406" class="reply-btn text-small text-muted">回复</a>
+        
+      </li>
+    </ul>
+  </footer>
+</div>
+
+              </div>
+            </div>
+            
+              <hr class="m-0">
+            
+          
+            <div class="flex-left py-4" id="c3408">
+              <div class="unit-0">
+                <img class="comment-avatar mr-3" src="./一种自顶而下的Python装饰器设计方法_追梦人物的博客_files/23264534">
+              </div>
+              <div class="unit">
+                
+  <div class="comment-main">
+  <header class="comment-user">
+        <span class="text-small text-muted nickname">Reborn0502
+          
+        </span>
+    
+    <span class="reply-label text-small text-muted">
+                                                        <i class="fa fa-share" aria-hidden="true"></i>
+                                                    </span>
+    <span class="nickname text-small text-muted">追梦人物
+        
+            <span class="master">[博主]</span>
+        
+
+  </span></header>
+  <div class="comment-body">
+    <p>有没有教程啊，我也想实现你博客里的评论效果</p>
+  </div>
+  <footer class="comment-footer flex-left">
+    <ul class="unit list-inline dot-divider">
+      <li class="list-inline-item">
+        <time class="text-small text-muted">3&nbsp;月，3&nbsp;周前</time>
+      </li>
+      <li class="list-inline-item">
+        <a href="https://www.zmrenwu.com/comments/reply/3408" class="reply-btn text-small text-muted">回复</a>
+        
+      </li>
+    </ul>
+  </footer>
+</div>
+
+              </div>
+            </div>
+            
+          
+        </div>
+      </div>
+    </div>
+    
+      <hr class="m-0">
+    
+  
+    <div class="flex-left py-4" id="c3399">
+      <div class="unit-0">
+        <img class="comment-avatar mr-3" src="./一种自顶而下的Python装饰器设计方法_追梦人物的博客_files/44693267">
+      </div>
+      <div class="unit">
+        <div class="comment-main">
+  <header class="comment-user">
+        <span class="text-small text-muted nickname">tosmart01
+          
+        </span>
+    
+  </header>
+  <div class="comment-body">
+    <p>logged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funcvlogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(funclogged(func<br></p>
+  </div>
+  <footer class="comment-footer flex-left">
+    <ul class="unit list-inline dot-divider">
+      <li class="list-inline-item">
+        <time class="text-small text-muted">3&nbsp;月，3&nbsp;周前</time>
+      </li>
+      <li class="list-inline-item">
+        <a href="https://www.zmrenwu.com/comments/reply/3399" class="reply-btn text-small text-muted">回复</a>
+        
+      </li>
+    </ul>
+  </footer>
+</div>
+        
+        <div class="comment-descendant-list">
+          
+        </div>
+      </div>
+    </div>
+    
+      <hr class="m-0">
+    
+  
+    <div class="flex-left py-4" id="c3375">
+      <div class="unit-0">
+        <img class="comment-avatar mr-3" src="./一种自顶而下的Python装饰器设计方法_追梦人物的博客_files/27860018">
+      </div>
+      <div class="unit">
+        <div class="comment-main">
+  <header class="comment-user">
+        <span class="text-small text-muted nickname">郭效杨
+          
+        </span>
+    
+  </header>
+  <div class="comment-body">
+    <p>问个问题，这里不带参数的装饰器和带有参数的装饰器统一后，例如</p><p>```</p><p>def logged(func=None, *, level='xx',name='xx',message='xx')</p><p>```</p><p>这里的func是指什么？我还没理解，如果默认为None，返回的时不带参数的装饰器，那么这个统一后的装饰器咋返回带有参数的装饰器的？</p>
+  </div>
+  <footer class="comment-footer flex-left">
+    <ul class="unit list-inline dot-divider">
+      <li class="list-inline-item">
+        <time class="text-small text-muted">4&nbsp;月，1&nbsp;周前</time>
+      </li>
+      <li class="list-inline-item">
+        <a href="https://www.zmrenwu.com/comments/reply/3375" class="reply-btn text-small text-muted">回复</a>
+        
+      </li>
+    </ul>
+  </footer>
+</div>
+        
+          <hr class="">
+        
+        <div class="comment-descendant-list">
+          
+            <div class="flex-left py-4" id="c3376">
+              <div class="unit-0">
+                <img class="comment-avatar mr-3" src="./一种自顶而下的Python装饰器设计方法_追梦人物的博客_files/13174219">
+              </div>
+              <div class="unit">
+                
+  <div class="comment-main">
+  <header class="comment-user">
+        <span class="text-small text-muted nickname">追梦人物
+          
+            <span class="master">[博主]</span>
+          
+        </span>
+    
+    <span class="reply-label text-small text-muted">
+                                                        <i class="fa fa-share" aria-hidden="true"></i>
+                                                    </span>
+    <span class="nickname text-small text-muted">郭效杨
+        
+
+  </span></header>
+  <div class="comment-body">
+    <p>这个装饰器两种调用方法，若使用</p><pre><code>@logged<br>def f():<br>&nbsp;&nbsp;pass<br><br>等价于：<br>decorated_func = logged(f)<br>func参数值不为 None，所以这个装饰器直接返回了内部的 wrapper 函数。</code></pre><p>若使用：</p><pre><code class="lang-python">@logged(level='xx',name='xx',message='xx')<br>def f():<br>&nbsp;&nbsp;pass<br><br>等价于：<br>partial_func = logged(level='xx',name='xx',message='xx')<br>decorated_func = partial_func(f)<br><br>第一次调用 func 参数值为 None，返会 if 中的 partial 函数，然后这个函数再去装饰 f，此时情况和上面那种一样。</code></pre>
+  </div>
+  <footer class="comment-footer flex-left">
+    <ul class="unit list-inline dot-divider">
+      <li class="list-inline-item">
+        <time class="text-small text-muted">4&nbsp;月，1&nbsp;周前</time>
+      </li>
+      <li class="list-inline-item">
+        <a href="https://www.zmrenwu.com/comments/reply/3376" class="reply-btn text-small text-muted">回复</a>
+        
+      </li>
+    </ul>
+  </footer>
+</div>
+
+              </div>
+            </div>
+            
+              <hr class="m-0">
+            
+          
+            <div class="flex-left py-4" id="c3377">
+              <div class="unit-0">
+                <img class="comment-avatar mr-3" src="./一种自顶而下的Python装饰器设计方法_追梦人物的博客_files/27860018">
+              </div>
+              <div class="unit">
+                
+  <div class="comment-main">
+  <header class="comment-user">
+        <span class="text-small text-muted nickname">郭效杨
+          
+        </span>
+    
+    <span class="reply-label text-small text-muted">
+                                                        <i class="fa fa-share" aria-hidden="true"></i>
+                                                    </span>
+    <span class="nickname text-small text-muted">追梦人物
+        
+            <span class="master">[博主]</span>
+        
+
+  </span></header>
+  <div class="comment-body">
+    <p>现在理解了，如果用`@logged`装饰，第一次调用可理解为func=被装饰的函数，而`@logged(level='xx',name='xx',message='xx')`第一次调用，还还没到调用被装饰的函数那一步(先返回不带参数的装饰器，然后在返回被装饰的函数)，所以func=None,应该是这样，感觉还挺绕的....</p>
+  </div>
+  <footer class="comment-footer flex-left">
+    <ul class="unit list-inline dot-divider">
+      <li class="list-inline-item">
+        <time class="text-small text-muted">4&nbsp;月，1&nbsp;周前</time>
+      </li>
+      <li class="list-inline-item">
+        <a href="https://www.zmrenwu.com/comments/reply/3377" class="reply-btn text-small text-muted">回复</a>
+        
+      </li>
+    </ul>
+  </footer>
+</div>
+
+              </div>
+            </div>
+            
+              <hr class="m-0">
+            
+          
+            <div class="flex-left py-4" id="c3378">
+              <div class="unit-0">
+                <img class="comment-avatar mr-3" src="./一种自顶而下的Python装饰器设计方法_追梦人物的博客_files/27860018">
+              </div>
+              <div class="unit">
+                
+  <div class="comment-main">
+  <header class="comment-user">
+        <span class="text-small text-muted nickname">郭效杨
+          
+        </span>
+    
+    <span class="reply-label text-small text-muted">
+                                                        <i class="fa fa-share" aria-hidden="true"></i>
+                                                    </span>
+    <span class="nickname text-small text-muted">郭效杨
+        
+
+  </span></header>
+  <div class="comment-body">
+    <p>为啥我写md不生效..</p>
+  </div>
+  <footer class="comment-footer flex-left">
+    <ul class="unit list-inline dot-divider">
+      <li class="list-inline-item">
+        <time class="text-small text-muted">4&nbsp;月，1&nbsp;周前</time>
+      </li>
+      <li class="list-inline-item">
+        <a href="https://www.zmrenwu.com/comments/reply/3378" class="reply-btn text-small text-muted">回复</a>
+        
+      </li>
+    </ul>
+  </footer>
+</div>
+
+              </div>
+            </div>
+            
+              <hr class="m-0">
+            
+          
+            <div class="flex-left py-4" id="c3379">
+              <div class="unit-0">
+                <img class="comment-avatar mr-3" src="./一种自顶而下的Python装饰器设计方法_追梦人物的博客_files/13174219">
+              </div>
+              <div class="unit">
+                
+  <div class="comment-main">
+  <header class="comment-user">
+        <span class="text-small text-muted nickname">追梦人物
+          
+            <span class="master">[博主]</span>
+          
+        </span>
+    
+    <span class="reply-label text-small text-muted">
+                                                        <i class="fa fa-share" aria-hidden="true"></i>
+                                                    </span>
+    <span class="nickname text-small text-muted">郭效杨
+        
+
+  </span></header>
+  <div class="comment-body">
+    <p>只支持富文本，不支持md</p>
+  </div>
+  <footer class="comment-footer flex-left">
+    <ul class="unit list-inline dot-divider">
+      <li class="list-inline-item">
+        <time class="text-small text-muted">4&nbsp;月前</time>
+      </li>
+      <li class="list-inline-item">
+        <a href="https://www.zmrenwu.com/comments/reply/3379" class="reply-btn text-small text-muted">回复</a>
+        
+      </li>
+    </ul>
+  </footer>
+</div>
+
+              </div>
+            </div>
+            
+          
+        </div>
+      </div>
+    </div>
+    
+  
+</div>
+</section>
+  </main>
+
+      
+  <aside class="unit-1-4 unit-1-on-mobile top-gap">
+    <div class="scroll-view bg-white card toc-sidebar">
+      <div class="card-header">
+        目录
+      </div>
+      <div class="card-body">
+        <div class="toc">
+<ul>
+<li><a href="https://www.zmrenwu.com/post/87/#python%E8%A3%85%E9%A5%B0%E5%99%A8%E5%8E%9F%E7%90%86">Python装饰器原理</a></li>
+<li><a href="https://www.zmrenwu.com/post/87/#%E8%87%AA%E9%A1%B6%E8%80%8C%E4%B8%8B%E8%AE%BE%E8%AE%A1%E8%A3%85%E9%A5%B0%E5%99%A8">自顶而下设计装饰器</a><ul>
+<li><a href="https://www.zmrenwu.com/post/87/#%E7%AE%80%E5%8D%95%E8%A3%85%E9%A5%B0%E5%99%A8">简单装饰器</a></li>
+<li><a href="https://www.zmrenwu.com/post/87/#%E5%B8%A6%E5%8F%82%E6%95%B0%E7%9A%84%E8%A3%85%E9%A5%B0%E5%99%A8">带参数的装饰器</a></li>
+<li><a href="https://www.zmrenwu.com/post/87/#%E5%A4%9A%E5%8A%9F%E8%83%BD%E8%A3%85%E9%A5%B0%E5%99%A8">多功能装饰器</a></li>
+<li><a href="https://www.zmrenwu.com/post/87/#%E8%A3%85%E9%A5%B0%E7%B1%BB">装饰类</a></li>
+</ul>
+</li>
+<li><a href="https://www.zmrenwu.com/post/87/#%E7%BB%83%E4%B9%A0">练习</a></li>
+<li><a href="https://www.zmrenwu.com/post/87/#%E6%80%BB%E7%BB%93">总结</a></li>
+</ul>
+</div>
+
+      </div>
+    </div>
+  </aside>
+
+    </div>
+  </div>
+</section>
+<footer class="bg-white py-5 mt-5 text-small text-muted">
+  <div class="flex-center">
+    <div>© 2018-2019 追梦人物的博客</div>
+  </div>
+  <div class="flex-center">
+    <div><a href="http://www.miitbeian.gov.cn/" target="_blank">蜀ICP备16036143号-1</a></div>
+  </div>
+</footer>
+<script>
+    $('[data-menu]').menu();
+
+    var InterValObj; //timer变量，控制时间
+    var curCount = 120;//当前剩余秒数
+
+    $('#js-send').on('click', function (event) {
+        var $this = $(this);
+        var $targetURL = $this.attr('data-target');
+        $.post(
+            $targetURL,
+            {email: $('#id_email').val()},
+            function (data) {
+                if (data.ok) {
+                    $this.attr("disabled", "true");
+                    $this.text("重新发送验证码" + "(" + curCount + ")");
+                    InterValObj = window.setInterval(SetRemainTime, 1000); //启动计时器，1秒执行一次
+                    $('.message')
+                        .find('span')
+                        .text(data.msg)
+                } else {
+                    $('.message').find('span').text(data.msg)
+                }
+            }
+        );
+        return false;
+    });
+
+    //timer处理函数
+    function SetRemainTime() {
+        if (curCount === 0) {
+            window.clearInterval(InterValObj);//停止计时器
+            $('#js-send').removeAttr("disabled");//启用按钮
+            $('#js-send').text("重新发送验证码");
+        } else {
+            curCount--;
+            $('#js-send').text("重新发送验证码" + "(" + curCount + ")");
+        }
+    }
+
+    $('#js-submit').on('click', function (event) {
+        var $this = $(this);
+        var $form = $('.email-binding-form');
+        var $targetURL = $form.attr('action');
+        console.log($targetURL);
+
+        $.post(
+            $targetURL,
+            {
+                email: $('#id_email').val(),
+                verification_code: $('#id_verification_code').val()
+            },
+            function (data) {
+                if (data.ok) {
+                    location.reload();
+                } else {
+                    $('.message')
+                        .find('span')
+                        .text(data.msg)
+                }
+            }
+        );
+        return false;
+    });
+
+
+    var editor = new Simditor({
+        textarea: $('#id_comment'),
+        placeholder: "提出你的见解...",
+        toolbarFloat: false,
+        cleanPaste: true,
+        toolbar: [
+            'bold',
+            'italic',
+            'underline',
+            'strikethrough',
+            'color',
+            'ol',
+            'ul',
+            'blockquote',
+            'code',
+            'table',
+            'link',
+            'image',
+            'hr'
+        ]
+    });
+</script>
+
+
+
+<a href="https://www.zmrenwu.com/post/87/#" class="back-top" style="display: none;"><i class="fa fa-arrow-up" aria-hidden="true"></i></a></body></html>
